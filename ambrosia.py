@@ -6,13 +6,16 @@ from slackclient import SlackClient
 
 # instantiate Slack client
 slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
+slack_api = SlackClient(os.environ.get("SLACK_BOT_USER_TOKEN"))
 # ambrosia's user ID in Slack: value is assigned after the bot starts up
 ambrosia_id = None
 
 # constants
 RTM_READ_DELAY = 1  # 1 second delay between reading from RTM
-COMMAND = "users"
+PARTICIPATE_COMMAND = "me"
+SHOW_PARTICIPANTS_COMMAND = "list"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
+MEMBERS = []
 
 
 def parse_bot_commands(slack_events):
@@ -39,28 +42,70 @@ def parse_direct_mention(message_text):
     return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
 
 
-def handle_command(command, channel):
-    """
-        Executes bot command if the command is known
-    """
-    # Default response is help text for the user
-    default_response = "Not sure what you mean. Try *{}*.".format(COMMAND)
+def register_user_as_participating(channel):
+    # need to capture the user who sent the message and put them inside an array
+    messages = slack_api.api_call(
+        "channels.history",
+        channel=channel,
+    )['messages']
+    # capture the id of the user who issued a command
+    id_of_user = messages[0]['user']
+    # search for the users name instead of id
+    list_of_members = slack_client.api_call("users.list")["members"]
+    for member in list_of_members:
+        if member['id'] == id_of_user:
+            user = member['name']
+            global MEMBERS
+            MEMBERS.append(user)
+            response = slack_client.api_call(
+                "chat.postMessage",
+                channel=channel,
+                text=f"Thanks <@{user}>! You are now signed up to become a lunch buddy today."
+            )
+            return response
 
-    # Finds and executes the given command, filling in response
-    response = None
-    # This is where you start to implement more commands!
-    if command.startswith(COMMAND):
-        participating_users = []
-        members_of_channel = slack_client.api_call("users.list")['members']
-        for member in members_of_channel:
-            response = member['name']
 
-    # Sends the response back to the channel
-    slack_client.api_call(
+def print_participating_users(channel):
+    global MEMBERS
+    members = list(set(MEMBERS))
+    response = slack_client.api_call(
         "chat.postMessage",
         channel=channel,
-        text=response or default_response
+        text=f"All the participating members are {members}"
     )
+    return response
+
+
+def message_at_11_am():
+    # this function should message out groups at 11 am
+    print("")
+
+
+def group_users():
+    """
+        this function should manipulate the global members array by removing four at a time
+        and printing them in a message at 11am
+    """
+    global MEMBERS
+    print(MEMBERS)
+
+
+def handle_command(command, channel):
+    # Executes bot command if the command is known
+    default_response = f"Not sure what you mean. Try `@ambrosia` *{PARTICIPATE_COMMAND}* or `@ambrosia` *{SHOW_PARTICIPANTS_COMMAND}*."
+    # Finds and executes the given command, filling in response
+    if command.startswith(PARTICIPATE_COMMAND):
+        register_user_as_participating(channel)
+
+    if command.startswith(SHOW_PARTICIPANTS_COMMAND):
+        print_participating_users(channel)
+
+    if not command.startswith(PARTICIPATE_COMMAND) and not command.startswith(SHOW_PARTICIPANTS_COMMAND):
+        slack_client.api_call(
+            "chat.postMessage",
+            channel=channel,
+            text=default_response
+        )
 
 
 if __name__ == "__main__":
@@ -73,5 +118,6 @@ if __name__ == "__main__":
             if command:
                 handle_command(command, channel)
             time.sleep(RTM_READ_DELAY)
+            group_users()
     else:
         print("Connection failed. Exception traceback printed above.")
