@@ -1,3 +1,4 @@
 # Ambrosia Slack bot
 ## Commands
-* `@ambrosia` I wanna eat
+* `@ambrosia` signup
+* `@ambrosia` list
