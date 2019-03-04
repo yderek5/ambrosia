@@ -5,8 +5,8 @@ from slackclient import SlackClient
 
 
 # instantiate Slack client
-slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
-slack_api = SlackClient(os.environ.get("SLACK_BOT_USER_TOKEN"))
+slack_client = SlackClient(os.environ.get('SLACK_BOT_USER_TOKEN'))
+slack_api = SlackClient(os.environ.get("SLACK_BOT_TOKEN"))
 # ambrosia's user ID in Slack: value is assigned after the bot starts up
 ambrosia_id = None
 
