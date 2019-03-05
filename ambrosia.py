@@ -160,7 +160,7 @@ if __name__ == "__main__":
             MINUTE = TIME.now().minute
             SECOND = TIME.now().second
             if HOUR is 13 and MINUTE is 56 and SECOND is 50:
-                print('The time is 11AM starting to group users')
+                print('The time is 10:30! Grouping users...')
                 create_groups_and_send_messages()
     else:
         print("Connection failed. Exception traceback printed above.")
