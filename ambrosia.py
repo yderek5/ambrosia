@@ -2,8 +2,8 @@ import os
 import time
 import re
 import datetime
+import random
 from slackclient import SlackClient
-
 
 # instantiate Slack client
 slack_client = SlackClient(os.environ.get('SLACK_BOT_USER_TOKEN'))
@@ -17,7 +17,7 @@ PARTICIPATE_COMMAND = "me"
 SHOW_PARTICIPANTS_COMMAND = "list"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 TIME = datetime.datetime
-MEMBERS = ['bob', 'joe', 'sally', 'emma']
+MEMBERS = []
 
 
 def parse_bot_commands(slack_events):
@@ -58,8 +58,9 @@ def register_user_as_participating(channel):
         if member['id'] == id_of_user:
             user = member['name']
             global MEMBERS
-            MEMBERS.append(user)
+            MEMBERS.append(f"<@{user}>")
             MEMBERS = list(set(MEMBERS))
+            random.shuffle(MEMBERS)
             response = slack_client.api_call(
                 "chat.postMessage",
                 channel=channel,
@@ -78,16 +79,52 @@ def print_participating_users(channel):
     return response
 
 
-def message_groups_in_channel():
-    # this function should message out groups at 11 am
-    print("")
+def build_message(group):
+    message = ""
+    for user in group:
+        message += f"{user}, "
+    message += "You should go to lunch today!"
+    return message
 
 
-def create_group():
-    """
-        this function should manipulate the global members array by removing four at a time
-        and printing them in a message at 11am
-    """
+def create_groups_and_send_messages():
+    global MEMBERS
+    # this function should manipulate the global members array by removing four at a time
+    # and printing them in a message at 11am
+    # see if the len(MEMBERS) is even or odd if odd make a group of 3 first then make groups of four
+    # pull the first 3 or 4 people from MEMBERS and pass them into GROUP
+
+    x = True
+
+    class Group:
+        def __init__(self, members):
+            self.members = members
+
+    while x is True:
+        if len(MEMBERS) < 2:
+            print("NO MORE PEOPLE SIGNED UP")
+            break
+        else:
+            if len(MEMBERS) & 1:
+                first_three = MEMBERS[:3]
+                MEMBERS = MEMBERS[3:]
+                odd_group = Group(first_three)
+                print(build_message(odd_group.members))
+                slack_client.api_call(
+                    "chat.postMessage",
+                    channel="testing-slack-bot",
+                    text=build_message(odd_group.members)
+                )
+            else:
+                first_four = MEMBERS[:4]
+                MEMBERS = MEMBERS[4:]
+                even_group = Group(first_four)
+                print(build_message(even_group.members))
+                slack_client.api_call(
+                    "chat.postMessage",
+                    channel="testing-slack-bot",
+                    text=build_message(even_group.members)
+                )
 
 
 def handle_command(command, channel):
@@ -101,6 +138,7 @@ def handle_command(command, channel):
         print_participating_users(channel)
 
     if not command.startswith(PARTICIPATE_COMMAND) and not command.startswith(SHOW_PARTICIPANTS_COMMAND):
+        print(default_response)
         slack_client.api_call(
             "chat.postMessage",
             channel=channel,
@@ -121,8 +159,8 @@ if __name__ == "__main__":
             HOUR = TIME.now().hour
             MINUTE = TIME.now().minute
             SECOND = TIME.now().second
-            if HOUR is 11 and MINUTE is 0 and SECOND is 0:
+            if HOUR is 13 and MINUTE is 56 and SECOND is 50:
                 print('The time is 11AM starting to group users')
-                create_group()
+                create_groups_and_send_messages()
     else:
         print("Connection failed. Exception traceback printed above.")
