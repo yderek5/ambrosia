@@ -15,7 +15,7 @@ RTM_READ_DELAY = 1  # 1 second delay between reading from RTM
 PARTICIPATE_COMMAND = "me"
 SHOW_PARTICIPANTS_COMMAND = "list"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
-MEMBERS = []
+MEMBERS = ['bob', 'joe', 'sally', 'emma']
 
 
 def parse_bot_commands(slack_events):
@@ -57,6 +57,7 @@ def register_user_as_participating(channel):
             user = member['name']
             global MEMBERS
             MEMBERS.append(user)
+            MEMBERS = list(set(MEMBERS))
             response = slack_client.api_call(
                 "chat.postMessage",
                 channel=channel,
@@ -67,11 +68,10 @@ def register_user_as_participating(channel):
 
 def print_participating_users(channel):
     global MEMBERS
-    members = list(set(MEMBERS))
     response = slack_client.api_call(
         "chat.postMessage",
         channel=channel,
-        text=f"All the participating members are {members}"
+        text=f"All the participating members are {MEMBERS}"
     )
     return response
 
