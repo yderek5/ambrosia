@@ -159,7 +159,7 @@ if __name__ == "__main__":
             HOUR = TIME.now().hour
             MINUTE = TIME.now().minute
             SECOND = TIME.now().second
-            if HOUR is 13 and MINUTE is 56 and SECOND is 50:
+            if HOUR is 11 and MINUTE is 0 and SECOND is 0:
                 print('The time is 10:30! Grouping users...')
                 create_groups_and_send_messages()
     else:
