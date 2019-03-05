@@ -18,7 +18,7 @@ PARTICIPATE_COMMAND = "eat"
 SHOW_PARTICIPANTS_COMMAND = "list"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 TIME = datetime.datetime
-MEMBERS = []
+MEMBERS = ['test']
 
 
 def parse_bot_commands(slack_events):
@@ -90,19 +90,14 @@ def build_message(group):
 
 
 def create_groups_and_send_messages():
-    random.shuffle(MEMBERS)
     global MEMBERS
+    random.shuffle(MEMBERS)
     # this function should manipulate the global members array by removing four at a time
     # and printing them in a message at 11am
     # see if the len(MEMBERS) is even or odd if odd make a group of 3 first then make groups of four
     # pull the first 3 or 4 people from MEMBERS and pass them into GROUP
 
     x = True
-
-    class Group:
-        def __init__(self, members):
-            self.members = members
-
     while x is True:
         if len(MEMBERS) < 2:
             print("NO MORE OR NOT ENOUGH PEOPLE SIGNED UP")
@@ -111,22 +106,20 @@ def create_groups_and_send_messages():
             if len(MEMBERS) & 1:
                 first_three = MEMBERS[:3]
                 MEMBERS = MEMBERS[3:]
-                odd_group = Group(first_three)
-                print(build_message(odd_group.members))
+                print(build_message(first_three))
                 slack_client.api_call(
                     "chat.postMessage",
                     channel="testing-slack-bot",
-                    attachments=build_message(odd_group.members)
+                    attachments=build_message(first_three)
                 )
             else:
                 first_four = MEMBERS[:4]
                 MEMBERS = MEMBERS[4:]
-                even_group = Group(first_four)
-                print(build_message(even_group.members))
+                print(build_message(first_four))
                 slack_client.api_call(
                     "chat.postMessage",
                     channel="testing-slack-bot",
-                    attachments=build_message(even_group.members)
+                    attachments=build_message(first_four)
                 )
 
 
@@ -162,7 +155,7 @@ if __name__ == "__main__":
             HOUR = TIME.now().hour
             MINUTE = TIME.now().minute
             SECOND = TIME.now().second
-            if HOUR is 10 and MINUTE is 30 and SECOND is 0:
+            if HOUR is 16 and MINUTE is 25 and SECOND is 30:
                 print('The time is 10:30! Grouping users...')
                 slack_client.api_call(
                     "chat.postMessage",
