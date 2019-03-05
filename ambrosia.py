@@ -1,6 +1,7 @@
 import os
 import time
 import re
+import datetime
 from slackclient import SlackClient
 
 
@@ -15,6 +16,7 @@ RTM_READ_DELAY = 1  # 1 second delay between reading from RTM
 PARTICIPATE_COMMAND = "me"
 SHOW_PARTICIPANTS_COMMAND = "list"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
+TIME = datetime.datetime
 MEMBERS = ['bob', 'joe', 'sally', 'emma']
 
 
@@ -76,18 +78,16 @@ def print_participating_users(channel):
     return response
 
 
-def message_at_11_am():
+def message_groups_in_channel():
     # this function should message out groups at 11 am
     print("")
 
 
-def group_users():
+def create_group():
     """
         this function should manipulate the global members array by removing four at a time
         and printing them in a message at 11am
     """
-    global MEMBERS
-    print(MEMBERS)
 
 
 def handle_command(command, channel):
@@ -118,6 +118,11 @@ if __name__ == "__main__":
             if command:
                 handle_command(command, channel)
             time.sleep(RTM_READ_DELAY)
-            group_users()
+            HOUR = TIME.now().hour
+            MINUTE = TIME.now().minute
+            SECOND = TIME.now().second
+            if HOUR is 11 and MINUTE is 0 and SECOND is 0:
+                print('The time is 11AM starting to group users')
+                create_group()
     else:
         print("Connection failed. Exception traceback printed above.")
