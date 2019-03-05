@@ -13,7 +13,7 @@ ambrosia_id = None
 
 # constants
 RTM_READ_DELAY = 1  # 1 second delay between reading from RTM
-PARTICIPATE_COMMAND = "me"
+PARTICIPATE_COMMAND = "eat"
 SHOW_PARTICIPANTS_COMMAND = "list"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 TIME = datetime.datetime
@@ -102,7 +102,7 @@ def create_groups_and_send_messages():
 
     while x is True:
         if len(MEMBERS) < 2:
-            print("NO MORE PEOPLE SIGNED UP")
+            print("NO MORE OR NOT ENOUGH PEOPLE SIGNED UP")
             break
         else:
             if len(MEMBERS) & 1:
@@ -159,7 +159,7 @@ if __name__ == "__main__":
             HOUR = TIME.now().hour
             MINUTE = TIME.now().minute
             SECOND = TIME.now().second
-            if HOUR is 11 and MINUTE is 0 and SECOND is 0:
+            if HOUR is 10 and MINUTE is 30 and SECOND is 0:
                 print('The time is 10:30! Grouping users...')
                 create_groups_and_send_messages()
     else:
