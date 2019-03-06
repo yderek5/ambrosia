@@ -4,11 +4,13 @@ import re
 import datetime
 import random
 import json
+from googleplaces import GooglePlaces, types
 from slackclient import SlackClient
 
 # instantiate Slack client
 slack_client = SlackClient(os.environ.get('SLACK_BOT_USER_TOKEN'))
 slack_api = SlackClient(os.environ.get("SLACK_BOT_TOKEN"))
+google_places = GooglePlaces(os.environ.get('GOOGLE_MAPS_KEY'))
 # ambrosia's user ID in Slack: value is assigned after the bot starts up
 ambrosia_id = None
 
@@ -19,6 +21,7 @@ SHOW_PARTICIPANTS_COMMAND = "list"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 TIME = datetime.datetime
 MEMBERS = []
+PLACES = []
 
 
 def parse_bot_commands(slack_events):
@@ -71,10 +74,18 @@ def register_user_as_participating(channel):
 
 def print_participating_users(channel):
     global MEMBERS
+    members = ""
+    for member in MEMBERS:
+        members += f"{member} \n"
+
+    message = json.dumps([{"text": f"{members}",
+                           "color": "#3AA3E3", "attachment_type": "default"}])
+
     response = slack_client.api_call(
         "chat.postMessage",
         channel=channel,
-        text=f"All the participating members are {MEMBERS}"
+        text="All the participating members are:",
+        attachments=message
     )
     return response
 
@@ -83,7 +94,36 @@ def build_message(group):
     text = ""
     for user in group:
         text += f"{user}, "
+    if datetime.datetime.now().isoweekday() == 4 or 5:
+        # here is google maps api logic to randomly select a restaurant if the day is thursday or friday
+        takeout = google_places.nearby_search(
+            location='Fairway, KS, United States',
+            radius=20000, types=[types.TYPE_MEAL_TAKEAWAY])
 
+        restaurants = google_places.nearby_search(
+            location="Fairway, KS, United States",
+            radius=20000, types=[types.TYPE_RESTAURANT]
+        )
+
+        fast_food = google_places.nearby_search(
+            location="Fairway, KS, United States", keyword="fast food",
+            radius=20000, types=[types.TYPE_FOOD]
+        )
+        random_takeout = takeout.places
+        random_restaurant = restaurants.places
+        random_fast_food = fast_food.places
+
+        random.shuffle(random_takeout)
+        random.shuffle(random_restaurant)
+        random.shuffle(random_fast_food)
+
+        PLACES.append(random_takeout[0].name)
+        PLACES.append(random_restaurant[0].name)
+        PLACES.append(random_fast_food[0].name)
+
+        random.shuffle(PLACES)
+
+        text += f"I recommend going here {PLACES[0]}"
     message = json.dumps([{"text": f"{text}",
                            "color": "#3AA3E3", "attachment_type": "default"}])
     return message
