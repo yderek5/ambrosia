@@ -19,7 +19,7 @@ PARTICIPATE_COMMAND = "eat"
 SHOW_PARTICIPANTS_COMMAND = "list"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 TIME = datetime.datetime
-MEMBERS = ['test']
+MEMBERS = []
 
 
 def parse_bot_commands(slack_events):
@@ -163,7 +163,7 @@ if __name__ == "__main__":
             HOUR = TIME.now().hour
             MINUTE = TIME.now().minute
             SECOND = TIME.now().second
-            if HOUR is 13 and MINUTE is 41 and SECOND is 30:
+            if HOUR is 10 and MINUTE is 30 and SECOND is 0:
                 print('The time is 10:30! Grouping users...')
                 slack_client.api_call(
                     "chat.postMessage",
