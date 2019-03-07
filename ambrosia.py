@@ -19,7 +19,7 @@ PARTICIPATE_COMMAND = "eat"
 SHOW_PARTICIPANTS_COMMAND = "list"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 TIME = datetime.datetime
-MEMBERS = []
+MEMBERS = ['test']
 
 
 def parse_bot_commands(slack_events):
@@ -89,13 +89,13 @@ def print_participating_users(channel):
 
 
 def build_message(group):
-    text = ""
+    text = "*Group:* \n"
     for user in group:
         text += f"{user}, "
     text += "\n"
     if datetime.datetime.now().isoweekday() == 4 or 5:
         random.shuffle(PLACES)
-        text += f"I recommend going to {PLACES[0]['name']}\n website: {PLACES[0]['url']}\n rating: ({PLACES[0]['rating']}/5)"
+        text += f"I recommend going to {PLACES[0]['name']}\n *Website:*\n{PLACES[0]['url']}\n*Rating:*\n({PLACES[0]['rating']}/5)"
     message = json.dumps([{"text": f"{text}",
                            "color": "#3AA3E3", "attachment_type": "default"}])
     return message
@@ -163,7 +163,7 @@ if __name__ == "__main__":
             HOUR = TIME.now().hour
             MINUTE = TIME.now().minute
             SECOND = TIME.now().second
-            if HOUR is 10 and MINUTE is 30 and SECOND is 0:
+            if HOUR is 13 and MINUTE is 41 and SECOND is 30:
                 print('The time is 10:30! Grouping users...')
                 slack_client.api_call(
                     "chat.postMessage",
