@@ -4,13 +4,12 @@ import re
 import datetime
 import random
 import json
-from googleplaces import GooglePlaces, types
+from google_maps_api import PLACES
 from slackclient import SlackClient
 
 # instantiate Slack client
 slack_client = SlackClient(os.environ.get('SLACK_BOT_USER_TOKEN'))
 slack_api = SlackClient(os.environ.get("SLACK_BOT_TOKEN"))
-google_places = GooglePlaces(os.environ.get('GOOGLE_MAPS_KEY'))
 # ambrosia's user ID in Slack: value is assigned after the bot starts up
 ambrosia_id = None
 
@@ -21,7 +20,6 @@ SHOW_PARTICIPANTS_COMMAND = "list"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 TIME = datetime.datetime
 MEMBERS = []
-PLACES = []
 
 
 def parse_bot_commands(slack_events):
@@ -94,36 +92,10 @@ def build_message(group):
     text = ""
     for user in group:
         text += f"{user}, "
+    text += "\n"
     if datetime.datetime.now().isoweekday() == 4 or 5:
-        # here is google maps api logic to randomly select a restaurant if the day is thursday or friday
-        takeout = google_places.nearby_search(
-            location='Fairway, KS, United States',
-            radius=20000, types=[types.TYPE_MEAL_TAKEAWAY])
-
-        restaurants = google_places.nearby_search(
-            location="Fairway, KS, United States",
-            radius=20000, types=[types.TYPE_RESTAURANT]
-        )
-
-        fast_food = google_places.nearby_search(
-            location="Fairway, KS, United States", keyword="fast food",
-            radius=20000, types=[types.TYPE_FOOD]
-        )
-        random_takeout = takeout.places
-        random_restaurant = restaurants.places
-        random_fast_food = fast_food.places
-
-        random.shuffle(random_takeout)
-        random.shuffle(random_restaurant)
-        random.shuffle(random_fast_food)
-
-        PLACES.append(random_takeout[0].name)
-        PLACES.append(random_restaurant[0].name)
-        PLACES.append(random_fast_food[0].name)
-
         random.shuffle(PLACES)
-
-        text += f"I recommend going here {PLACES[0]}"
+        text += f"I recommend going to {PLACES[0]['name']}\n website: {PLACES[0]['url']}\n rating: ({PLACES[0]['rating']}/5)"
     message = json.dumps([{"text": f"{text}",
                            "color": "#3AA3E3", "attachment_type": "default"}])
     return message
@@ -132,11 +104,7 @@ def build_message(group):
 def create_groups_and_send_messages():
     global MEMBERS
     random.shuffle(MEMBERS)
-    # this function should manipulate the global members array by removing four at a time
-    # and printing them in a message at 11am
-    # see if the len(MEMBERS) is even or odd if odd make a group of 3 first then make groups of four
-    # pull the first 3 or 4 people from MEMBERS and pass them into GROUP
-
+    # see if the len(MEMBERS) is even or odd if odd make a group of 3 first then make groups of four or two
     x = True
     while x is True:
         if len(MEMBERS) < 2:
