@@ -4,7 +4,7 @@ import re
 import datetime
 import random
 import json
-from google_maps_api import PLACES
+from google_maps_api import PLACES, google_maps
 from slackclient import SlackClient
 
 # instantiate Slack client
@@ -95,9 +95,11 @@ def build_message(group):
     text += "\n"
     if datetime.datetime.now().isoweekday() == 4 or 5:
         random.shuffle(PLACES)
+        google_maps()
         text += f"I recommend going to {PLACES[0]['name']}\n *Website:*\n{PLACES[0]['url']}\n*Rating:*\n({PLACES[0]['rating']}/5)"
     message = json.dumps([{"text": f"{text}",
                            "color": "#3AA3E3", "attachment_type": "default"}])
+    print(message)
     return message
 
 
@@ -114,7 +116,6 @@ def create_groups_and_send_messages():
             if len(MEMBERS) & 1:
                 first_three = MEMBERS[:3]
                 MEMBERS = MEMBERS[3:]
-                print(build_message(first_three))
                 slack_client.api_call(
                     "chat.postMessage",
                     channel="testing-slack-bot",
@@ -123,7 +124,6 @@ def create_groups_and_send_messages():
             else:
                 first_four = MEMBERS[:4]
                 MEMBERS = MEMBERS[4:]
-                print(build_message(first_four))
                 slack_client.api_call(
                     "chat.postMessage",
                     channel="testing-slack-bot",
