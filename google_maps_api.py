@@ -1,7 +1,7 @@
 import random
 import os
 from googleplaces import GooglePlaces, types
-google_places = GooglePlaces(os.environ.get('GOOGLE_MAPS_KEY'))
+google_places = GooglePlaces(os.environ.get('google_maps_key'))
 PLACES = []
 
 

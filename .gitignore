@@ -1,3 +1,7 @@
 .idea
+helm
 ambrosia
 __pycache__
+GOOGLE_MAPS_KEY.txt
+SLACK_BOT_TOKEN.txt
+SLACK_BOT_USER_TOKEN.txt
